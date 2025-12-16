@@ -1,8 +1,10 @@
-import React from "react";
+import React, { use } from "react";
 import { Link, NavLink } from "react-router";
 import ThemeToggle from "../Theme/ThemeToggle";
+import { AuthContext } from "../../Context/AuthContext/AuthContext";
 
 const Navbar = () => {
+  const { signOutUser, user } = use(AuthContext);
   const navLinks = (
     <>
       <li>
@@ -63,12 +65,22 @@ const Navbar = () => {
             {/* Right */}
             <div className="navbar-end gap-2">
               <ThemeToggle />
-              <Link to="/auth/login" className="btn btn-primary">
-                Login
-              </Link>
-              <Link to="/auth/register" className="btn btn-primary">
-                Register
-              </Link>
+              {user ? (
+                <>
+                  <button onClick={signOutUser} className="btn btn-primary">
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link to="/auth/login" className="btn btn-primary">
+                    Login
+                  </Link>
+                  <Link to="/auth/register" className="btn btn-primary">
+                    Register
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

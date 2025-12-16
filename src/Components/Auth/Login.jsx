@@ -1,7 +1,8 @@
 import { useForm } from "react-hook-form";
-import { useState } from "react";
+import { use, useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { Link } from "react-router";
+import { Link, Navigate } from "react-router";
+import { AuthContext } from "../../Context/AuthContext/AuthContext";
 
 export default function Login() {
   const {
@@ -12,12 +13,29 @@ export default function Login() {
 
   const [showPassword, setShowPassword] = useState(false);
 
+  const { googleSignIn, user } = use(AuthContext);
+
   const onSubmit = (data) => {
     console.log("Login Data:", data);
   };
 
+  const signInWithGoogle = () => {
+    console.log("google login button clicked");
+    googleSignIn()
+      .then((result) => {
+        const loggedUser = result.user;
+        console.log(loggedUser);
+      })
+      .catch((error) => {
+        console.log("error:", error.message);
+      });
+  };
+  if (user) {
+    return <Navigate to="/" />;
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-base-200">
+    <div className="min-h-[calc(100vh-65px)]  flex items-center justify-center bg-base-200">
       <div className="card w-full max-w-md shadow-xl bg-base-100">
         <div className="card-body">
           <h2 className="text-2xl font-bold text-center">Login</h2>
@@ -107,7 +125,10 @@ export default function Login() {
 
           {/* Social Login */}
           <div className="space-y-2">
-            <button className="btn bg-white text-black border-[#e5e5e5] w-full">
+            <button
+              onClick={signInWithGoogle}
+              className="btn bg-white text-black border-[#e5e5e5] w-full"
+            >
               <svg
                 aria-label="Google logo"
                 width="16"
