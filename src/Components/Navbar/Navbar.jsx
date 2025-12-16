@@ -18,9 +18,10 @@ const Navbar = () => {
       </li>
     </>
   );
+  console.log(user);
 
   return (
-    <div className="relative overflow-hidden bg-base-100 shadow-sm">
+    <div className="relative bg-base-100 shadow-sm">
       {/* Moving glow */}
       <div className="pointer-events-none absolute inset-0">
         <div className="" />
@@ -67,6 +68,30 @@ const Navbar = () => {
               <ThemeToggle />
               {user ? (
                 <>
+                  <div className="dropdown dropdown-end">
+                    <div
+                      tabIndex={0}
+                      role="button"
+                      className="w-12 h-12 rounded-full overflow-hidden cursor-pointer"
+                    >
+                      <img
+                        className="w-full h-full"
+                        src={user?.photoURL}
+                        alt="profile"
+                      />
+                    </div>
+                    <ul
+                      tabIndex="-1"
+                      className="dropdown-content menu bg-base-100 rounded-box w-52 p-2 shadow-sm"
+                    >
+                      <li>
+                        <Link>My Profile</Link>
+                      </li>
+                      <li>
+                        <Link>Dashboard</Link>
+                      </li>
+                    </ul>
+                  </div>
                   <button onClick={signOutUser} className="btn btn-primary">
                     Logout
                   </button>

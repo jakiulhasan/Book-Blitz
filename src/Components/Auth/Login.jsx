@@ -13,10 +13,17 @@ export default function Login() {
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const { googleSignIn, user } = use(AuthContext);
+  const { userSignIn, googleSignIn, user } = use(AuthContext);
 
   const onSubmit = (data) => {
     console.log("Login Data:", data);
+    userSignIn(data.email, data.password)
+      .then((res) => {
+        console.log(res.data);
+      })
+      .catch((errors) => {
+        console.log(errors);
+      });
   };
 
   const signInWithGoogle = () => {

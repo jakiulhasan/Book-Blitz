@@ -2,7 +2,6 @@ import { use, useState } from "react";
 import { useForm } from "react-hook-form";
 import { AuthContext } from "../../Context/AuthContext/AuthContext";
 import { Link, Navigate } from "react-router";
-import Loading from "../Loading/Loading";
 
 export default function Register() {
   const { user, createAccount, updateUserProfile } = use(AuthContext);
@@ -84,10 +83,11 @@ export default function Register() {
               <label className="label">
                 <span className="label-text">Name</span>
               </label>
+              <br />
               <input
                 type="text"
                 placeholder="Your name"
-                className={`input input-bordered ${
+                className={`input w-full input-bordered ${
                   errors.name && "input-error"
                 }`}
                 {...register("name", {
@@ -108,10 +108,11 @@ export default function Register() {
               <label className="label">
                 <span className="label-text">Email</span>
               </label>
+              <br />
               <input
                 type="email"
                 placeholder="email@example.com"
-                className={`input input-bordered ${
+                className={`input  w-full input-bordered ${
                   errors.email && "input-error"
                 }`}
                 {...register("email", {
@@ -132,10 +133,11 @@ export default function Register() {
               <label className="label">
                 <span className="label-text">Password</span>
               </label>
+              <br />
               <input
                 type="password"
                 placeholder="Strong password"
-                className={`input input-bordered ${
+                className={`input  w-full input-bordered ${
                   errors.password && "input-error"
                 }`}
                 {...register("password", {
@@ -165,7 +167,7 @@ export default function Register() {
               <input
                 type="file"
                 accept="image/*"
-                className={`file-input file-input-bordered ${
+                className={`file-input w-full file-input-bordered ${
                   errors.image && "file-input-error"
                 }`}
                 {...register("image", {
