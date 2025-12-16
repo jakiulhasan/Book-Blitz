@@ -1,5 +1,5 @@
 import React from "react";
-import { NavLink } from "react-router";
+import { Link, NavLink } from "react-router";
 import ThemeToggle from "../Theme/ThemeToggle";
 
 const Navbar = () => {
@@ -63,8 +63,12 @@ const Navbar = () => {
             {/* Right */}
             <div className="navbar-end gap-2">
               <ThemeToggle />
-              <button className="btn btn-primary">Login</button>
-              <button className="btn btn-primary">Register</button>
+              <Link to="/auth/login" className="btn btn-primary">
+                Login
+              </Link>
+              <Link to="/auth/register" className="btn btn-primary">
+                Register
+              </Link>
             </div>
           </div>
         </div>
