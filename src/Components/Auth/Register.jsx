@@ -1,10 +1,12 @@
 import { use, useState } from "react";
 import { useForm } from "react-hook-form";
 import { AuthContext } from "../../Context/AuthContext/AuthContext";
-import { Link, Navigate } from "react-router";
+import { Link, Navigate, useNavigate } from "react-router";
+import axiosInstance from "../../Context/Axios/Axios";
 
 export default function Register() {
-  const { user, createAccount, updateUserProfile } = use(AuthContext);
+  const { setUser, user, createAccount, updateUserProfile } = use(AuthContext);
+  const navigate = useNavigate();
 
   const {
     register,
@@ -16,7 +18,7 @@ export default function Register() {
   const [preview, setPreview] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // ImgBB upload function
+  // ImgBB upload
   const uploadImageToImgBB = async (imageFile) => {
     const formData = new FormData();
     formData.append("image", imageFile);
@@ -30,35 +32,49 @@ export default function Register() {
     );
 
     const data = await res.json();
+    setUser({ photoURL: data.data.display_url });
     return data.data.display_url;
   };
 
   // Submit handler
-  const onSubmit = async (data) => {
-    try {
-      setIsLoading(true);
+  const onSubmit = (data) => {
+    setIsLoading(true);
 
-      // Create user
-      const result = await createAccount(data.email, data.password);
+    const imageFile = data.image[0];
 
-      if (result.user) {
-        // Upload image
-        const imageURL = await uploadImageToImgBB(data.image[0]);
+    createAccount(data.email, data.password)
+      .then(() => {
+        // upload image
+        return uploadImageToImgBB(imageFile);
+      })
+      .then((imageURL) => {
+        // save user in database
+        const userInfo = {
+          name: data.name,
+          email: data.email,
+          photoURL: imageURL,
+        };
 
-        // Update profile
-        await updateUserProfile({
+        return axiosInstance.post("/add-user", userInfo).then(() => imageURL);
+      })
+      .then((imageURL) => {
+        // update firebase profile
+        return updateUserProfile({
           displayName: data.name,
           photoURL: imageURL,
         });
-
+      })
+      .then(() => {
         reset();
         setPreview(null);
-      }
-    } catch (error) {
-      console.error("Registration failed:", error);
-    } finally {
-      setIsLoading(false);
-    }
+        navigate("/");
+      })
+      .catch((error) => {
+        console.error("Registration failed:", error);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   // Image preview
@@ -80,104 +96,56 @@ export default function Register() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Name */}
             <div className="form-control">
-              <label className="label">
-                <span className="label-text">Name</span>
-              </label>
-              <br />
+              <label className="label">Name</label>
               <input
                 type="text"
-                placeholder="Your name"
-                className={`input w-full input-bordered ${
+                className={`input input-bordered ${
                   errors.name && "input-error"
                 }`}
-                {...register("name", {
-                  required: "Name is required",
-                  minLength: {
-                    value: 3,
-                    message: "Name must be at least 3 characters",
-                  },
-                })}
+                {...register("name", { required: "Name is required" })}
               />
               {errors.name && (
-                <p className="text-error text-sm">{errors.name.message}</p>
+                <p className="text-error">{errors.name.message}</p>
               )}
             </div>
 
             {/* Email */}
             <div className="form-control">
-              <label className="label">
-                <span className="label-text">Email</span>
-              </label>
-              <br />
+              <label className="label">Email</label>
               <input
                 type="email"
-                placeholder="email@example.com"
-                className={`input  w-full input-bordered ${
+                className={`input input-bordered ${
                   errors.email && "input-error"
                 }`}
-                {...register("email", {
-                  required: "Email is required",
-                  pattern: {
-                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: "Invalid email address",
-                  },
-                })}
+                {...register("email", { required: "Email is required" })}
               />
-              {errors.email && (
-                <p className="text-error text-sm">{errors.email.message}</p>
-              )}
             </div>
 
             {/* Password */}
             <div className="form-control">
-              <label className="label">
-                <span className="label-text">Password</span>
-              </label>
-              <br />
+              <label className="label">Password</label>
               <input
                 type="password"
-                placeholder="Strong password"
-                className={`input  w-full input-bordered ${
+                className={`input input-bordered ${
                   errors.password && "input-error"
                 }`}
                 {...register("password", {
                   required: "Password is required",
-                  minLength: {
-                    value: 8,
-                    message: "Minimum 8 characters",
-                  },
-                  pattern: {
-                    value:
-                      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?#&])[A-Za-z\d@$!%*?#&]+$/,
-                    message:
-                      "Uppercase, lowercase, number & special character required",
-                  },
+                  minLength: 8,
+                  pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?#&]).+$/,
                 })}
               />
-              {errors.password && (
-                <p className="text-error text-sm">{errors.password.message}</p>
-              )}
             </div>
 
             {/* Image */}
             <div className="form-control">
-              <label className="label">
-                <span className="label-text">Profile Image</span>
-              </label>
+              <label className="label">Profile Image</label>
               <input
                 type="file"
-                accept="image/*"
-                className={`file-input w-full file-input-bordered ${
-                  errors.image && "file-input-error"
-                }`}
-                {...register("image", {
-                  required: "Profile image is required",
-                })}
+                className="file-input file-input-bordered"
+                {...register("image", { required: true })}
                 onChange={handleImageChange}
               />
-              {errors.image && (
-                <p className="text-error text-sm">{errors.image.message}</p>
-              )}
             </div>
 
             {/* Preview */}
@@ -185,26 +153,23 @@ export default function Register() {
               <div className="flex justify-center">
                 <img
                   src={preview}
-                  alt="Preview"
-                  className="w-24 h-24 rounded-full object-cover ring ring-primary ring-offset-2"
+                  alt="preview"
+                  className="w-24 h-24 rounded-full"
                 />
               </div>
             )}
 
-            {/* Submit */}
             <button className="btn btn-primary w-full" disabled={isLoading}>
               {isLoading ? "Creating Account..." : "Register"}
             </button>
           </form>
 
-          <div className="text-center mt-5">
-            <span>
-              Already have an account?
-              <Link to="/auth/login" className="ml-2 text-red-500">
-                Login
-              </Link>
-            </span>
-          </div>
+          <p className="text-center mt-4">
+            Already have an account?
+            <Link to="/auth/login" className="text-red-500 ml-1">
+              Login
+            </Link>
+          </p>
         </div>
       </div>
     </div>
