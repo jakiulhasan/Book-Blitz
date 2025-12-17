@@ -3,6 +3,7 @@ import { use, useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, Navigate } from "react-router";
 import { AuthContext } from "../../Context/AuthContext/AuthContext";
+import axiosInstance from "../../Context/Axios/Axios";
 
 export default function Login() {
   const {
@@ -29,9 +30,17 @@ export default function Login() {
   const signInWithGoogle = () => {
     console.log("google login button clicked");
     googleSignIn()
-      .then((result) => {
+      .then(async (result) => {
         const loggedUser = result.user;
         console.log(loggedUser);
+
+        const user = {
+          name: loggedUser.displayName,
+          email: loggedUser.email,
+          photoURL: loggedUser.photoURL,
+        };
+
+        await axiosInstance.post("/add-user", user);
       })
       .catch((error) => {
         console.log("error:", error.message);
