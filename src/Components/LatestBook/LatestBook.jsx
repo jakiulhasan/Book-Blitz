@@ -1,11 +1,12 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "../../Context/Axios/Axios";
-
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay } from "swiper/modules";
+import { Autoplay, Pagination } from "swiper/modules";
+import { BookOpen, Calendar, User } from "lucide-react";
 
 import "swiper/css";
+import "swiper/css/pagination";
 
 const fetchLatestBooks = async () => {
   const res = await axiosInstance.get("/books?latest=true");
@@ -22,36 +23,62 @@ const LatestBook = () => {
     queryFn: fetchLatestBooks,
   });
 
+  // Skeleton Loader for clean UI during fetch
   if (isLoading) {
-    return <div className="text-center py-10">Loading latest books...</div>;
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-12">
+        <div className="h-10 w-48 bg-base-300 animate-pulse rounded mb-8"></div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((n) => (
+            <div key={n} className="flex flex-col gap-4 w-full">
+              <div className="skeleton h-64 w-full"></div>
+              <div className="skeleton h-4 w-28"></div>
+              <div className="skeleton h-4 w-full"></div>
+              <div className="skeleton h-4 w-full"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   if (isError) {
     return (
-      <div className="text-center py-10 text-red-500">
-        Failed to load latest books
+      <div className="alert alert-error max-w-7xl mx-auto my-10">
+        <span>Failed to load latest books. Please try again later.</span>
       </div>
     );
   }
 
   return (
-    <div className="my-12">
-      <h2 className="text-2xl font-semibold mb-6">Latest Books</h2>
+    <section className="max-w-7xl mx-auto px-4 py-16">
+      <div className="flex items-center justify-between mb-10">
+        <div>
+          <h2 className="text-3xl md:text-4xl font-bold">Latest Arrivals</h2>
+          <div className="h-1 w-20 bg-primary mt-2 rounded-full"></div>
+        </div>
+        <button className="btn btn-ghost btn-sm text-primary hidden sm:flex">
+          View All Books
+        </button>
+      </div>
 
       <Swiper
-        modules={[Autoplay]}
+        modules={[Autoplay, Pagination]}
         slidesPerView={4}
-        spaceBetween={20}
-        loop
+        spaceBetween={25}
+        loop={books.length > 4}
+        pagination={{ clickable: true, dynamicBullets: true }}
         autoplay={{
-          delay: 2500,
+          delay: 3500,
           disableOnInteraction: false,
         }}
         breakpoints={{
-          0: { slidesPerView: 1 },
-          640: { slidesPerView: 2 },
-          1024: { slidesPerView: 4 },
+          0: { slidesPerView: 1.2, centeredSlides: true, spaceBetween: 15 },
+          640: { slidesPerView: 2, centeredSlides: false },
+          1024: { slidesPerView: 3 },
+          1280: { slidesPerView: 4 },
         }}
+        className="pb-14" // Space for pagination dots
       >
         {books.map((book) => {
           const publishedYear = book?.publishedDate?.$date
@@ -59,43 +86,61 @@ const LatestBook = () => {
             : "N/A";
 
           return (
-            <SwiperSlide key={book._id}>
-              <div className="card bg-base-100 shadow-md h-full">
-                <figure className="h-48">
+            <SwiperSlide key={book._id} className="h-auto">
+              <div className="group card bg-base-100 border border-base-200 h-full hover:shadow-2xl transition-all duration-500 overflow-hidden">
+                {/* Image Section with Overlay */}
+                <figure className="relative h-72 overflow-hidden">
                   <img
                     src={book.thumbnailUrl}
                     alt={book.title}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
-                </figure>
-
-                <div className="card-body p-4">
-                  <h3 className="font-semibold text-lg line-clamp-1">
-                    {book.title}
-                  </h3>
-
-                  <p className="text-sm text-gray-500 line-clamp-1">
-                    {book.authors?.join(", ") || "Unknown Author"}
-                  </p>
-
-                  <p className="text-xs text-gray-400 mt-1">
-                    Published: {publishedYear}
-                  </p>
-
-                  {book.categories?.length > 0 && (
-                    <div className="mt-2">
-                      <span className="badge badge-outline badge-sm">
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <button className="btn btn-primary btn-sm rounded-full">
+                      Quick View
+                    </button>
+                  </div>
+                  {book.categories?.[0] && (
+                    <div className="absolute top-3 left-3">
+                      <span className="badge badge-primary font-medium text-xs">
                         {book.categories[0]}
                       </span>
                     </div>
                   )}
+                </figure>
+
+                {/* Content Section */}
+                <div className="card-body p-5 flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-bold text-lg leading-tight group-hover:text-primary transition-colors line-clamp-2">
+                      {book.title}
+                    </h3>
+
+                    <div className="flex items-center gap-2 mt-3 text-sm text-base-content/70">
+                      <User size={14} className="text-primary" />
+                      <span className="truncate">
+                        {book.authors?.join(", ") || "Unknown Author"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 mt-2 text-xs text-base-content/50">
+                      <Calendar size={14} />
+                      <span>Published: {publishedYear}</span>
+                    </div>
+                  </div>
+
+                  <div className="card-actions justify-end mt-4 pt-4 border-t border-base-200">
+                    <button className="btn btn-sm btn-outline btn-primary w-full group-hover:btn-active">
+                      <BookOpen size={16} /> Read Details
+                    </button>
+                  </div>
                 </div>
               </div>
             </SwiperSlide>
           );
         })}
       </Swiper>
-    </div>
+    </section>
   );
 };
 
