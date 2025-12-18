@@ -2,8 +2,12 @@ import React, { use } from "react";
 import { Link, NavLink } from "react-router";
 import ThemeToggle from "../Theme/ThemeToggle";
 import { AuthContext } from "../../Context/AuthContext/AuthContext";
+import useRole from "../../hooks/useRole";
 
 const Navbar = () => {
+  const role = useRole();
+
+  console.log(role);
   const { signOutUser, user } = use(AuthContext);
   const navLinks = (
     <>
