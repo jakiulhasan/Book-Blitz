@@ -4,6 +4,8 @@ import axiosInstance from "../../Context/Axios/Axios";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
 import { BookOpen, Calendar, User } from "lucide-react";
+// eslint-disable-next-line no-unused-vars
+import { motion } from "framer-motion"; // 1. Import motion
 
 import "swiper/css";
 import "swiper/css/pagination";
@@ -23,7 +25,24 @@ const LatestBook = () => {
     queryFn: fetchLatestBooks,
   });
 
-  // Skeleton Loader for clean UI during fetch
+  // 2. Animation Variants
+  const containerVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        staggerChildren: 0.1, // Stagger the animation of each book card
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  };
+
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-12">
@@ -42,16 +61,17 @@ const LatestBook = () => {
     );
   }
 
-  if (isError) {
-    return (
-      <div className="alert alert-error max-w-7xl mx-auto my-10">
-        <span>Failed to load latest books. Please try again later.</span>
-      </div>
-    );
-  }
+  if (isError) return null;
 
   return (
-    <section className="max-w-7xl mx-auto px-4 py-16">
+    // 3. Wrap the section or the header in motion.div
+    <motion.section
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-100px" }} // Triggers when 100px into view
+      variants={containerVariants}
+      className="max-w-7xl mx-auto px-4 py-16"
+    >
       <div className="flex items-center justify-between mb-10">
         <div>
           <h2 className="text-3xl md:text-4xl font-bold">Latest Arrivals</h2>
@@ -78,7 +98,7 @@ const LatestBook = () => {
           1024: { slidesPerView: 3 },
           1280: { slidesPerView: 4 },
         }}
-        className="pb-14" // Space for pagination dots
+        className="pb-14"
       >
         {books.map((book) => {
           const publishedYear = book?.publishedDate?.$date
@@ -87,8 +107,11 @@ const LatestBook = () => {
 
           return (
             <SwiperSlide key={book._id} className="h-auto">
-              <div className="group card bg-base-100 border border-base-200 h-full hover:shadow-2xl transition-all duration-500 overflow-hidden">
-                {/* Image Section with Overlay */}
+              {/* 4. Use itemVariants for each card */}
+              <motion.div
+                variants={itemVariants}
+                className="group card bg-base-100 border border-base-200 h-full hover:shadow-2xl transition-all duration-500 overflow-hidden"
+              >
                 <figure className="relative h-72 overflow-hidden">
                   <img
                     src={book.thumbnailUrl}
@@ -109,7 +132,6 @@ const LatestBook = () => {
                   )}
                 </figure>
 
-                {/* Content Section */}
                 <div className="card-body p-5 flex flex-col justify-between">
                   <div>
                     <h3 className="font-bold text-lg leading-tight group-hover:text-primary transition-colors line-clamp-2">
@@ -135,12 +157,12 @@ const LatestBook = () => {
                     </button>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </SwiperSlide>
           );
         })}
       </Swiper>
-    </section>
+    </motion.section>
   );
 };
 
