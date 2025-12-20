@@ -5,19 +5,23 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
 import { BookOpen, Calendar, User } from "lucide-react";
 // eslint-disable-next-line no-unused-vars
-import { motion } from "framer-motion"; // 1. Import motion
+import { motion } from "framer-motion";
 
 import "swiper/css";
 import "swiper/css/pagination";
 
 const fetchLatestBooks = async () => {
   const res = await axiosInstance.get("/books?latest=true");
-  return res.data;
+  // Logic: return the data directly if it's an array,
+  // otherwise look for a property like 'books' or 'data' inside the response
+  return Array.isArray(res.data)
+    ? res.data
+    : res.data.books || res.data.data || [];
 };
 
 const LatestBook = () => {
   const {
-    data: books = [],
+    data: books = [], // Default to empty array
     isLoading,
     isError,
   } = useQuery({
@@ -25,7 +29,6 @@ const LatestBook = () => {
     queryFn: fetchLatestBooks,
   });
 
-  // 2. Animation Variants
   const containerVariants = {
     hidden: { opacity: 0, y: 30 },
     visible: {
@@ -33,7 +36,7 @@ const LatestBook = () => {
       y: 0,
       transition: {
         duration: 0.6,
-        staggerChildren: 0.1, // Stagger the animation of each book card
+        staggerChildren: 0.1,
       },
     },
   };
@@ -61,14 +64,16 @@ const LatestBook = () => {
     );
   }
 
-  if (isError) return null;
+  // Handle case where no books are found or error occurs
+  if (isError || !Array.isArray(books) || books.length === 0) {
+    return null;
+  }
 
   return (
-    // 3. Wrap the section or the header in motion.div
     <motion.section
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, margin: "-100px" }} // Triggers when 100px into view
+      viewport={{ once: true, margin: "-100px" }}
       variants={containerVariants}
       className="max-w-7xl mx-auto px-4 py-16"
     >
@@ -107,7 +112,6 @@ const LatestBook = () => {
 
           return (
             <SwiperSlide key={book._id} className="h-auto">
-              {/* 4. Use itemVariants for each card */}
               <motion.div
                 variants={itemVariants}
                 className="group card bg-base-100 border border-base-200 h-full hover:shadow-2xl transition-all duration-500 overflow-hidden"

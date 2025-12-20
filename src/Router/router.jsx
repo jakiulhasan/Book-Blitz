@@ -4,6 +4,7 @@ import MainLayouts from "../Layouts/MainLayouts";
 import Login from "../Components/Auth/Login";
 import Register from "../Components/Auth/Register";
 import Homepage from "../Components/Pages/Homepage";
+import AllBooks from "../Components/Pages/AllBook/AllBooks";
 
 const router = createBrowserRouter([
   {
@@ -21,6 +22,10 @@ const router = createBrowserRouter([
       {
         path: "/auth/register",
         Component: Register,
+      },
+      {
+        path: "/all-books",
+        Component: AllBooks,
       },
     ],
   },
