@@ -1,15 +1,22 @@
 import React, { useState } from "react";
+import { Link } from "react-router";
 
 const BookCard = ({ book }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
 
-  const { title, authors, price, thumbnailUrl, longDescription, categories } =
-    book;
+  const {
+    isbn,
+    title,
+    authors,
+    price,
+    thumbnailUrl,
+    longDescription,
+    categories,
+  } = book;
 
   return (
     <>
-      {/* --- Main Card --- */}
       <div className="group border border-gray-100 rounded-xl p-4 hover:shadow-xl transition-shadow duration-300 bg-white">
         <div className="relative aspect-3/4 bg-gray-100 rounded-lg mb-4 overflow-hidden">
           <img
@@ -25,27 +32,33 @@ const BookCard = ({ book }) => {
           </button>
         </div>
 
-        <h4 className="font-bold text-gray-900 truncate" title={title}>
+        <Link
+          to={`/books/${isbn}`}
+          className="font-bold text-gray-900 truncate"
+          title={title}
+        >
           {title}
-        </h4>
+        </Link>
         <p className="text-sm text-gray-500 mb-2">{authors?.join(", ")}</p>
 
         <div className="flex items-center justify-between">
           <span className="text-blue-600 font-bold">${price}</span>
-          <button className="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-md hover:bg-blue-600 hover:text-white transition-colors">
-            Add to Cart
-          </button>
+          <Link
+            to={`/books/${isbn}`}
+            className="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-md hover:bg-blue-600 hover:text-white transition-colors"
+          >
+            View Details
+          </Link>
         </div>
       </div>
 
-      {/* --- Quick View Modal --- */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative p-6 md:p-8 flex flex-col md:flex-row gap-8">
             <button
               onClick={() => {
                 setIsModalOpen(false);
-                setShowFullDescription(false); // Reset when closing
+                setShowFullDescription(false);
               }}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl"
             >
@@ -71,7 +84,6 @@ const BookCard = ({ book }) => {
 
               <h5 className="font-semibold text-gray-900 mb-2">Description</h5>
 
-              {/* --- Line Clamp Logic --- */}
               <p
                 className={`text-gray-600 text-sm leading-relaxed ${
                   !showFullDescription ? "line-clamp-5" : ""
@@ -96,9 +108,12 @@ const BookCard = ({ book }) => {
                     ${price}
                   </span>
                 </div>
-                <button className="bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-blue-700 transition-shadow shadow-lg shadow-blue-200">
-                  Add to Cart
-                </button>
+                <Link
+                  to={`/books/${isbn}`}
+                  className="bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-blue-700 transition-shadow shadow-lg shadow-blue-200"
+                >
+                  Order Now
+                </Link>
               </div>
             </div>
           </div>

@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 
 import "swiper/css";
 import "swiper/css/pagination";
+import { Link } from "react-router";
 
 const fetchLatestBooks = async () => {
   const res = await axiosInstance.get("/books?latest=true");
@@ -138,7 +139,7 @@ const LatestBook = () => {
 
                 <div className="card-body p-5 flex flex-col justify-between">
                   <div>
-                    <h3 className="font-bold text-lg leading-tight group-hover:text-primary transition-colors line-clamp-2">
+                    <h3 className="font-bold text-lg leading-tight group-hover:text-primary transition-colors line-clamp-1">
                       {book.title}
                     </h3>
 
@@ -156,9 +157,12 @@ const LatestBook = () => {
                   </div>
 
                   <div className="card-actions justify-end mt-4 pt-4 border-t border-base-200">
-                    <button className="btn btn-sm btn-outline btn-primary w-full group-hover:btn-active">
-                      <BookOpen size={16} /> Read Details
-                    </button>
+                    <Link
+                      to={`/books/${book.isbn}`}
+                      className="btn btn-sm btn-outline btn-primary w-full group-hover:btn-active"
+                    >
+                      <BookOpen size={16} /> View Details
+                    </Link>
                   </div>
                 </div>
               </motion.div>

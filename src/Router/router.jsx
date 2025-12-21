@@ -9,6 +9,11 @@ import UserDashboard from "../Components/Pages/Dashboard/UserDashboard";
 import PrivateRoute from "./PrivateRoute";
 import AdminRoute from "./AdminRoute";
 import AdminDashboard from "../Components/Pages/Dashboard/AdminDashboard";
+import UserRoute from "./UserRoute";
+import LibrarianRoute from "./LibrarianRoute";
+import LibrarianDashboard from "../Components/Pages/Dashboard/LibrarianDashboard";
+import { Book } from "lucide-react";
+import BookDetails from "../Components/BookDetails/BookDetails";
 
 const router = createBrowserRouter([
   {
@@ -28,14 +33,20 @@ const router = createBrowserRouter([
         Component: Register,
       },
       {
-        path: "/all-books",
+        path: "/books",
         Component: AllBooks,
+      },
+      {
+        path: "/books/:isbn",
+        Component: BookDetails,
       },
       {
         path: "/user/dashboard",
         element: (
           <PrivateRoute>
-            <UserDashboard />
+            <UserRoute>
+              <UserDashboard />
+            </UserRoute>
           </PrivateRoute>
         ),
       },
@@ -46,6 +57,16 @@ const router = createBrowserRouter([
             <AdminRoute>
               <AdminDashboard />
             </AdminRoute>
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "/librarian/dashboard",
+        element: (
+          <PrivateRoute>
+            <LibrarianRoute>
+              <LibrarianDashboard />
+            </LibrarianRoute>
           </PrivateRoute>
         ),
       },

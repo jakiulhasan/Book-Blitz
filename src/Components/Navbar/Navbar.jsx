@@ -36,7 +36,7 @@ const Navbar = () => {
     <>
       {[
         { to: "/", icon: <Home size={18} />, label: "Home" },
-        { to: "/all-books", icon: <Book size={18} />, label: "All Books" },
+        { to: "/books", icon: <Book size={18} />, label: "All Books" },
       ].map((link, i) => (
         <motion.li
           key={link.to}
