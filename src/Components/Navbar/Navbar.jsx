@@ -17,8 +17,9 @@ import { AuthContext } from "../../Context/AuthContext/AuthContext";
 import useRole from "../../hooks/useRole";
 
 const Navbar = () => {
-  const role = useRole();
+  const { role } = useRole();
   console.log(role);
+
   const { signOutUser, user } = use(AuthContext);
 
   // Animation Variants
@@ -60,7 +61,12 @@ const Navbar = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <NavLink to="/dashboard">
+          <NavLink
+            to={`/${role}/dashboard`}
+            className={({ isActive }) =>
+              isActive ? "text-primary font-bold" : ""
+            }
+          >
             <LayoutDashboard size={18} /> Dashboard
           </NavLink>
         </motion.li>

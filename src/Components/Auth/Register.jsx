@@ -97,9 +97,10 @@ export default function Register() {
             {/* Name */}
             <div className="form-control">
               <label className="label">Name</label>
+              <br />
               <input
                 type="text"
-                className={`input input-bordered ${
+                className={`input input-bordered w-full ${
                   errors.name && "input-error"
                 }`}
                 {...register("name", { required: "Name is required" })}
@@ -112,9 +113,10 @@ export default function Register() {
             {/* Email */}
             <div className="form-control">
               <label className="label">Email</label>
+              <br />
               <input
                 type="email"
-                className={`input input-bordered ${
+                className={`input w-full input-bordered ${
                   errors.email && "input-error"
                 }`}
                 {...register("email", { required: "Email is required" })}
@@ -123,10 +125,11 @@ export default function Register() {
 
             {/* Password */}
             <div className="form-control">
-              <label className="label">Password</label>
+              <label className="label ">Password</label>
+              <br />
               <input
                 type="password"
-                className={`input input-bordered ${
+                className={`input w-full input-bordered ${
                   errors.password && "input-error"
                 }`}
                 {...register("password", {
@@ -142,7 +145,7 @@ export default function Register() {
               <label className="label">Profile Image</label>
               <input
                 type="file"
-                className="file-input file-input-bordered"
+                className="file-input w-full file-input-bordered"
                 {...register("image", { required: true })}
                 onChange={handleImageChange}
               />
