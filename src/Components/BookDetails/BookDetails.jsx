@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react";
-import axiosInstance from "../../Context/Axios/Axios";
+import React, { use, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -11,27 +10,109 @@ import {
   ShoppingCart,
   Star,
   CheckCircle2,
+  Loader2,
 } from "lucide-react";
 import Swal from "sweetalert2";
+import axiosInstance from "../../Context/Axios/Axios";
+import { AuthContext } from "../../Context/AuthContext/AuthContext";
+import useRole from "../../hooks/useRole";
 
 const BookDetails = () => {
+  const { user } = use(AuthContext);
   const { isbn } = useParams();
   const navigate = useNavigate();
+  const { role } = useRole();
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isOrdering, setIsOrdering] = useState(false);
 
   useEffect(() => {
-    axiosInstance
-      .get(`/books/${isbn}`)
-      .then((res) => {
+    const fetchBook = async () => {
+      try {
+        const res = await axiosInstance.get(`/books/${isbn}`);
         setBook(res.data);
+      } catch (err) {
+        console.error("Fetch Error:", err);
+      } finally {
         setLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setLoading(false);
-      });
+      }
+    };
+    fetchBook();
   }, [isbn]);
+
+  const handleOrderNow = async () => {
+    if (!user) {
+      const loginNav = await Swal.fire({
+        title: "Login Required",
+        text: "Please sign in to purchase this book.",
+        icon: "info",
+        showCancelButton: true,
+        confirmButtonText: "Go to Login",
+        confirmButtonColor: "#2563eb",
+      });
+      if (loginNav.isConfirmed) navigate("/auth/login");
+      return;
+    }
+
+    const result = await Swal.fire({
+      title: "Confirm Purchase",
+      text: `Order "${book.title}" for $${book.price}?`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#2563eb",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Place Order",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        setIsOrdering(true);
+
+        const orderPayload = {
+          customer: {
+            uid: user.uid,
+            email: user.email,
+            name: user.displayName || "Anonymous",
+          },
+          items: [
+            {
+              bookId: book._id,
+              isbn: book.isbn,
+              title: book.title,
+              price: book.price,
+              quantity: 1,
+            },
+          ],
+          totalAmount: book.price,
+          status: "pending",
+          transactionDate: new Date().toISOString(),
+        };
+
+        const response = await axiosInstance.post("/orders", orderPayload);
+
+        if (response.status === 200 || response.status === 201) {
+          await Swal.fire({
+            title: "Order Placed!",
+            text: "Your order has been recorded successfully.",
+            icon: "success",
+            timer: 2000,
+            showConfirmButton: false,
+          });
+          navigate(`/${role}/dashboard`);
+        }
+      } catch (error) {
+        Swal.fire({
+          title: "Order Failed",
+          text:
+            error.response?.data?.message ||
+            "There was an issue processing your order.",
+          icon: "error",
+        });
+      } finally {
+        setIsOrdering(false);
+      }
+    }
+  };
 
   if (loading) {
     return (
@@ -45,28 +126,19 @@ const BookDetails = () => {
     );
   }
 
-  if (!book)
-    return <div className="text-center py-20 font-medium">Book not found.</div>;
-
-  const handleOrderNow = () => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        Swal.fire({
-          title: "Deleted!",
-          text: "Your file has been deleted.",
-          icon: "success",
-        });
-      }
-    });
-  };
+  if (!book) {
+    return (
+      <div className="text-center py-20 font-medium">
+        <h2 className="text-2xl">Book not found.</h2>
+        <button
+          onClick={() => navigate("/")}
+          className="text-blue-500 underline mt-4"
+        >
+          Return Home
+        </button>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -84,7 +156,7 @@ const BookDetails = () => {
       </button>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-        {/* Left Column: Image & Quick Stats */}
+        {/* Left Column: Image & Stats */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -92,7 +164,7 @@ const BookDetails = () => {
           className="lg:col-span-4 space-y-6"
         >
           <div className="relative group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+            <div className="absolute -inset-1 bg-linear-to-r from-blue-600 to-indigo-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
             <img
               src={book.thumbnailUrl}
               alt={book.title}
@@ -107,7 +179,7 @@ const BookDetails = () => {
                 <p className="text-xs text-gray-400 uppercase font-bold">
                   Pages
                 </p>
-                <p className="font-semibold">{book.pageCount}</p>
+                <p className="font-semibold">{book.pageCount || "N/A"}</p>
               </div>
             </div>
             <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center gap-3">
@@ -117,7 +189,7 @@ const BookDetails = () => {
                   ISBN
                 </p>
                 <p className="font-semibold text-sm">
-                  {book.isbn.slice(-5)}...
+                  {book.isbn?.slice(-5)}...
                 </p>
               </div>
             </div>
@@ -175,8 +247,7 @@ const BookDetails = () => {
           <div className="space-y-8">
             <div>
               <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-3">
-                <BookOpen className="w-5 h-5 text-blue-500" />
-                About this book
+                <BookOpen className="w-5 h-5 text-blue-500" /> About this book
               </h3>
               <p className="text-gray-600 leading-relaxed text-lg italic border-l-4 border-blue-100 pl-4 mb-4">
                 {book.shortDescription}
@@ -186,17 +257,22 @@ const BookDetails = () => {
               </p>
             </div>
 
-            <div
-              onClick={handleOrderNow}
-              className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-100"
-            >
+            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-100">
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-blue-200 transition-all"
+                whileHover={{ scale: isOrdering ? 1 : 1.02 }}
+                whileTap={{ scale: isOrdering ? 1 : 0.98 }}
+                onClick={handleOrderNow}
+                disabled={isOrdering}
+                className={`flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-blue-200 transition-all ${
+                  isOrdering ? "opacity-70 cursor-not-allowed" : ""
+                }`}
               >
-                <ShoppingCart className="w-5 h-5" />
-                Order Now
+                {isOrdering ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <ShoppingCart className="w-5 h-5" />
+                )}
+                {isOrdering ? "Processing Order..." : "Order Now"}
               </motion.button>
 
               <div className="flex items-center gap-3 px-6 py-4 bg-gray-50 rounded-2xl">
@@ -206,10 +282,12 @@ const BookDetails = () => {
                     Release Date
                   </p>
                   <p className="text-sm font-bold text-gray-700">
-                    {new Date(book.publishedDate).toLocaleDateString(
-                      undefined,
-                      { year: "numeric", month: "short" }
-                    )}
+                    {book.publishedDate
+                      ? new Date(book.publishedDate).toLocaleDateString(
+                          undefined,
+                          { year: "numeric", month: "short" }
+                        )
+                      : "N/A"}
                   </p>
                 </div>
               </div>
