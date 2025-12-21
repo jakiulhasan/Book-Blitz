@@ -12,6 +12,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { AuthContext } from "../../../Context/AuthContext/AuthContext";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
+import axiosInstance from "../../../Context/Axios/Axios";
 
 const UserDashboard = () => {
   const [activeTab, setActiveTab] = useState("orders");
@@ -45,25 +46,23 @@ const UserDashboard = () => {
       });
   };
 
-  const handlePayNow = (order) => {
-    // Generate transaction data once per event click
-    // const transactionId = `INV-${Date.now()}`;
-    const paymentDate = new Date().toISOString().split("T")[0];
-
-    // Update Orders Status
-    setOrders((prevOrders) =>
-      prevOrders.map((o) => (o.id === order.id ? { ...o, status: "paid" } : o))
+  const handlePayNow = async (order) => {
+    const paymentInfo = {
+      cost: order.price,
+      parcelId: order._id,
+      senderEmail: order.email,
+      parcelName: order.title,
+    };
+    const res = await axiosSecure.post(
+      "/payment-checkout-session",
+      paymentInfo
     );
 
-    // Add to Invoices
-    const newInvoice = {
-      //   id: transactionId,
-      book: order.title,
-      amount: order.amount,
-      date: paymentDate,
-    };
-
-    setInvoices((prevInvoices) => [newInvoice, ...prevInvoices]);
+    console.log(res.data);
+    if (res.data?.url) {
+      // .assign() adds the page to your history
+      window.location.assign(res.data.url);
+    }
   };
 
   return (

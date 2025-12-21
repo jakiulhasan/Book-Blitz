@@ -14,6 +14,8 @@ import LibrarianRoute from "./LibrarianRoute";
 import LibrarianDashboard from "../Components/Pages/Dashboard/LibrarianDashboard";
 import { Book } from "lucide-react";
 import BookDetails from "../Components/BookDetails/BookDetails";
+import PaymentCancelled from "../Components/Pages/Dashboard/PaymentCancelled";
+import PaymentSuccess from "../Components/Pages/Dashboard/PaymentSuccess";
 
 const router = createBrowserRouter([
   {
@@ -59,6 +61,14 @@ const router = createBrowserRouter([
             </AdminRoute>
           </PrivateRoute>
         ),
+      },
+      {
+        path: "/dashboard/payment-success",
+        Component: PaymentSuccess,
+      },
+      {
+        path: "/dashboard/payment-cancelled",
+        Component: PaymentCancelled,
       },
       {
         path: "/librarian/dashboard",
