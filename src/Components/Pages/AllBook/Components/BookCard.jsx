@@ -34,12 +34,14 @@ const BookCard = ({ book }) => {
 
         <Link
           to={`/books/${isbn}`}
-          className="font-bold text-gray-900 truncate"
+          className="font-bold text-gray-900 block leading-tight mb-1 hover:text-blue-600 transition-colors"
           title={title}
         >
-          {title}
+          <span className="line-clamp-1">{title}</span>
         </Link>
-        <p className="text-sm text-gray-500 mb-2">{authors?.join(", ")}</p>
+        <p className="text-sm text-gray-500 mb-2 leading-relaxed">
+          <span className="line-clamp-1">{authors?.join(", ")}</span>
+        </p>
 
         <div className="flex items-center justify-between">
           <span className="text-blue-600 font-bold">${price}</span>
@@ -78,7 +80,7 @@ const BookCard = ({ book }) => {
                 {categories?.[0]}
               </span>
               <h2 className="text-2xl font-bold text-gray-900 mt-1">{title}</h2>
-              <p className="text-gray-600 mb-4 text-sm">
+              <p className="text-gray-600 mb-4 text-sm truncate line-clamp-1">
                 by {authors?.join(", ")}
               </p>
 

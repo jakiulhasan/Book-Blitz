@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import {
   ShoppingBag,
   User,
@@ -8,55 +8,41 @@ import {
   CheckCircle,
   Camera,
 } from "lucide-react";
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
-
-// --- Static Initial Data ---
-const INITIAL_ORDERS = [
-  {
-    id: "ORD-101",
-    title: "The Great Gatsby",
-    date: "2023-10-24",
-    status: "pending",
-    amount: 15.99,
-  },
-  {
-    id: "ORD-102",
-    title: "Atomic Habits",
-    date: "2023-10-20",
-    status: "paid",
-    amount: 20.0,
-  },
-  {
-    id: "ORD-103",
-    title: "Dune",
-    date: "2023-10-15",
-    status: "cancelled",
-    amount: 25.5,
-  },
-];
-
-const INITIAL_INVOICES = [
-  { id: "INV-8821", book: "Atomic Habits", amount: 20.0, date: "2023-10-20" },
-];
+import { AuthContext } from "../../../Context/AuthContext/AuthContext";
+import useAxiosSecure from "../../../hooks/useAxiosSecure";
 
 const UserDashboard = () => {
   const [activeTab, setActiveTab] = useState("orders");
-  const [orders, setOrders] = useState(INITIAL_ORDERS);
-  const [invoices, setInvoices] = useState(INITIAL_INVOICES);
-  const [user, setUser] = useState({
-    name: "Jane Doe",
-    email: "jane@example.com",
-    image: "https://i.pravatar.cc/150?u=jane",
-  });
+  const [orders, setOrders] = useState([]);
+  const [invoices, setInvoices] = useState([]);
+  const { user } = use(AuthContext);
+  const email = user?.email;
+  const axiosSecure = useAxiosSecure();
 
-  // --- Handlers (Side Effects are isolated here) ---
+  useEffect(() => {
+    axiosSecure.get("/orders", { params: { email } }).then((res) => {
+      console.log(res.data);
+      setOrders(res.data);
+    });
+  }, [email, axiosSecure]);
 
   const handleCancel = (orderId) => {
-    setOrders((prevOrders) =>
-      prevOrders.map((order) =>
-        order.id === orderId ? { ...order, status: "cancelled" } : order
-      )
-    );
+    axiosSecure
+      .patch(`/orders/${orderId}`, { status: "cancelled" })
+      .then((res) => {
+        if (res.data.modifiedCount > 0) {
+          setOrders((prevOrders) =>
+            prevOrders.map((order) =>
+              order._id === orderId ? { ...order, status: "cancelled" } : order
+            )
+          );
+        }
+      })
+      .catch((err) => {
+        console.error("Error cancelling order:", err);
+      });
   };
 
   const handlePayNow = (order) => {
@@ -130,17 +116,32 @@ const UserDashboard = () => {
                     <table className="table w-full">
                       <thead>
                         <tr className="bg-base-200/50">
-                          <th>Book</th>
+                          <th>#</th>
+                          <th>Book Title</th>
                           <th>Order Date</th>
                           <th>Status</th>
                           <th className="text-right">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {orders.map((order) => (
+                        {orders.map((order, i) => (
                           <tr key={order.id} className="hover">
+                            <td>{i + 1}</td>
                             <td className="font-medium">{order.title}</td>
-                            <td>{order.date}</td>
+                            <td>
+                              {new Date(order.orderDate).toLocaleString(
+                                "en-GB",
+                                {
+                                  timeZone: "Asia/Dhaka",
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  hour12: true,
+                                }
+                              )}
+                            </td>
                             <td>
                               <div
                                 className={`badge badge-flat font-bold ${
@@ -164,7 +165,7 @@ const UserDashboard = () => {
                                     Pay Now
                                   </button>
                                   <button
-                                    onClick={() => handleCancel(order.id)}
+                                    onClick={() => handleCancel(order._id)}
                                     className="btn btn-sm btn-ghost text-error"
                                   >
                                     Cancel

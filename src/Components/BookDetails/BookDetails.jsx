@@ -1,5 +1,6 @@
 import React, { use, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
 import {
   BookOpen,
@@ -69,23 +70,17 @@ const BookDetails = () => {
         setIsOrdering(true);
 
         const orderPayload = {
-          customer: {
-            uid: user.uid,
-            email: user.email,
-            name: user.displayName || "Anonymous",
-          },
-          items: [
-            {
-              bookId: book._id,
-              isbn: book.isbn,
-              title: book.title,
-              price: book.price,
-              quantity: 1,
-            },
-          ],
+          uid: user.uid,
+          email: user.email,
+          name: user.displayName || "Anonymous",
+          bookId: book._id,
+          isbn: book.isbn,
+          title: book.title,
+          price: book.price,
+          quantity: 1,
           totalAmount: book.price,
           status: "pending",
-          transactionDate: new Date().toISOString(),
+          orderDate: new Date().toISOString(),
         };
 
         const response = await axiosInstance.post("/orders", orderPayload);
