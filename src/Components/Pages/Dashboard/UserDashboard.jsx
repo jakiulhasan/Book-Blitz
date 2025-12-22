@@ -13,12 +13,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { AuthContext } from "../../../Context/AuthContext/AuthContext";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import axiosInstance from "../../../Context/Axios/Axios";
+import { ProfileTab } from "./ProfileTab";
 
 const UserDashboard = () => {
   const [activeTab, setActiveTab] = useState("orders");
   const [orders, setOrders] = useState([]);
-  const [invoices, setInvoices] = useState([]);
-  const { user } = use(AuthContext);
+  const { user, updateUserProfile } = use(AuthContext);
   const email = user?.email;
   const axiosSecure = useAxiosSecure();
 
@@ -178,52 +178,7 @@ const UserDashboard = () => {
             )}
 
             {/* PROFILE PAGE */}
-            {activeTab === "profile" && (
-              <div className="card bg-base-100 shadow-sm border border-base-300 max-w-xl">
-                <div className="card-body">
-                  <h2 className="card-title text-xl mb-6">
-                    Profile Information
-                  </h2>
-                  <div className="flex items-center gap-6 mb-8">
-                    <div className="avatar">
-                      <div className="w-20 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                        <img src={user.image} alt="Avatar" />
-                      </div>
-                    </div>
-                    <button className="btn btn-outline btn-sm gap-2">
-                      <Camera size={14} /> Change Photo
-                    </button>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="form-control">
-                      <label className="label font-semibold">
-                        Display Name
-                      </label>
-                      <input
-                        type="text"
-                        value={user.name}
-                        onChange={(e) =>
-                          setUser((prev) => ({ ...prev, name: e.target.value }))
-                        }
-                        className="input input-bordered"
-                      />
-                    </div>
-                    <div className="form-control">
-                      <label className="label font-semibold">Email</label>
-                      <input
-                        type="text"
-                        value={user.email}
-                        className="input input-bordered opacity-60"
-                        readOnly
-                      />
-                    </div>
-                    <button className="btn btn-primary w-full mt-4">
-                      Save Changes
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
+            {activeTab === "profile" && <ProfileTab></ProfileTab>}
           </motion.div>
         </AnimatePresence>
       </div>

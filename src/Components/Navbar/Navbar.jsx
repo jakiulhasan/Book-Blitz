@@ -170,12 +170,12 @@ const Navbar = () => {
                   >
                     <li className="menu-title text-base-content/50">Account</li>
                     <li>
-                      <Link to="/profile">
+                      <Link to={`/${role}/dashboard`}>
                         <User size={16} /> My Profile
                       </Link>
                     </li>
                     <li>
-                      <Link to="/settings">
+                      <Link to={`/${role}/dashboard`}>
                         <Settings size={16} /> Settings
                       </Link>
                     </li>
