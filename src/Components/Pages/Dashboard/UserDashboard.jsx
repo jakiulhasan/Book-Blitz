@@ -86,14 +86,6 @@ const UserDashboard = () => {
           >
             <User size={16} /> Profile
           </button>
-          <button
-            onClick={() => setActiveTab("invoices")}
-            className={`tab gap-2 transition-all ${
-              activeTab === "invoices" ? "tab-active" : ""
-            }`}
-          >
-            <FileText size={16} /> Invoices
-          </button>
         </div>
 
         <AnimatePresence mode="wait">
@@ -124,7 +116,7 @@ const UserDashboard = () => {
                       </thead>
                       <tbody>
                         {orders.map((order, i) => (
-                          <tr key={order.id} className="hover">
+                          <tr key={i} className="hover">
                             <td>{i + 1}</td>
                             <td className="font-medium">{order.title}</td>
                             <td>
@@ -228,41 +220,6 @@ const UserDashboard = () => {
                     <button className="btn btn-primary w-full mt-4">
                       Save Changes
                     </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* INVOICES PAGE */}
-            {activeTab === "invoices" && (
-              <div className="card bg-base-100 shadow-sm border border-base-300">
-                <div className="card-body p-0">
-                  <div className="p-6 border-b border-base-200">
-                    <h2 className="card-title text-xl">Payment History</h2>
-                  </div>
-                  <div className="overflow-x-auto">
-                    <table className="table w-full">
-                      <thead>
-                        <tr className="bg-base-200/50">
-                          <th>Payment ID</th>
-                          <th>Book</th>
-                          <th>Date</th>
-                          <th className="text-right">Amount</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {invoices.map((inv) => (
-                          <tr key={inv.id} className="hover">
-                            <td className="font-mono text-xs">{inv.id}</td>
-                            <td>{inv.book}</td>
-                            <td>{inv.date}</td>
-                            <td className="text-right font-bold text-success">
-                              ${inv.amount.toFixed(2)}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
                   </div>
                 </div>
               </div>
