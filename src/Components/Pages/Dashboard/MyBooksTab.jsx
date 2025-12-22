@@ -1,22 +1,33 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import axiosInstance from "../../../Context/Axios/Axios";
+import { AuthContext } from "../../../Context/AuthContext/AuthContext";
 
 const MyBooksTab = () => {
+  const { user } = use(AuthContext);
   const [books, setBooks] = useState([]);
 
   useEffect(() => {
     axiosInstance
-      .get("/librarian/books?email=librarian@email.com")
+      .get(`/librarian/books?email=${user.email}`)
       .then((res) => setBooks(res.data));
-  }, []);
+  }, [user.email]);
 
-  const toggleStatus = async (id, currentStatus) => {
-    const newStatus =
-      currentStatus === "published" ? "unpublished" : "published";
-    await axiosInstance.patch(`/librarian/books/${id}`, { status: newStatus });
+  const handleUnpublish = async (id) => {
+    await axiosInstance.patch(`/librarian/books/${id}`, {
+      status: "UNPUBLISHED",
+    });
 
     setBooks((prev) =>
-      prev.map((b) => (b._id === id ? { ...b, status: newStatus } : b))
+      prev.map((b) => (b._id === id ? { ...b, status: "UNPUBLISHED" } : b))
+    );
+  };
+  const handlePublish = async (id) => {
+    await axiosInstance.patch(`/librarian/books/${id}`, {
+      status: "PUBLISHED",
+    });
+
+    setBooks((prev) =>
+      prev.map((b) => (b._id === id ? { ...b, status: "PUBLISHED" } : b))
     );
   };
 
@@ -43,7 +54,11 @@ const MyBooksTab = () => {
                 <tr key={book._id} className="hover">
                   <td>{i + 1}</td>
                   <td>
-                    <img src={book.image} alt="" className="w-12 rounded" />
+                    <img
+                      src={book.thumbnailUrl}
+                      alt=""
+                      className="w-12 rounded"
+                    />
                   </td>
                   <td className="font-medium">{book.title}</td>
                   <td>
@@ -58,12 +73,25 @@ const MyBooksTab = () => {
                     </span>
                   </td>
                   <td className="text-right">
-                    <button
-                      onClick={() => toggleStatus(book._id, book.status)}
-                      className="btn btn-xs btn-outline"
-                    >
-                      Toggle
-                    </button>
+                    {book.status === "PUBLISHED" ? (
+                      <button
+                        onClick={() => {
+                          handleUnpublish(book._id);
+                        }}
+                        className="btn btn-outline"
+                      >
+                        Unpublish
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          handlePublish(book._id);
+                        }}
+                        className="btn btn-outline"
+                      >
+                        Publish
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

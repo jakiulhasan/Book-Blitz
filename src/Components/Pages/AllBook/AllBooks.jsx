@@ -54,8 +54,8 @@ const AllBooks = () => {
     queryFn: async ({ pageParam = 0 }) => {
       // Map the UI state to the backend sort strings
       const sortMapping = {
-        newest: "publishedDate:desc",
-        oldest: "publishedDate:asc",
+        newest: "publishedDate:asc",
+        oldest: "publishedDate:desc",
         priceLow: "price:asc",
         priceHigh: "price:desc",
       };
