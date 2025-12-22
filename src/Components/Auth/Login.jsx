@@ -4,6 +4,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, Navigate } from "react-router";
 import { AuthContext } from "../../Context/AuthContext/AuthContext";
 import axiosInstance from "../../Context/Axios/Axios";
+import Swal from "sweetalert2";
 
 export default function Login() {
   const {
@@ -21,9 +22,17 @@ export default function Login() {
     userSignIn(data.email, data.password)
       .then((res) => {
         console.log(res.data);
+        Swal.fire({
+          position: "center",
+          icon: "success",
+          title: "Login Successful",
+          showConfirmButton: false,
+          timer: 1500,
+        });
       })
       .catch((errors) => {
         console.log(errors);
+        alert(errors.message);
       });
   };
 
@@ -33,6 +42,14 @@ export default function Login() {
       .then(async (result) => {
         const loggedUser = result.user;
         console.log(loggedUser);
+
+        Swal.fire({
+          position: "center",
+          icon: "success",
+          title: "Login Successful",
+          showConfirmButton: false,
+          timer: 1500,
+        });
 
         const user = {
           name: loggedUser.displayName,
@@ -44,6 +61,7 @@ export default function Login() {
       })
       .catch((error) => {
         console.log("error:", error.message);
+        alert(error.message);
       });
   };
   if (user) {

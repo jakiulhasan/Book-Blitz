@@ -55,17 +55,45 @@ const BookDetails = () => {
       return;
     }
 
-    const result = await Swal.fire({
-      title: "Confirm Purchase",
-      text: `Order "${book.title}" for $${book.price}?`,
-      icon: "question",
+    // Modal with Form for Phone and Address
+    const { value: formValues } = await Swal.fire({
+      title: "Complete Your Order",
+      html: `
+        <div style="text-align: left; font-family: sans-serif;">
+          <label style="display:block; margin-bottom: 5px; font-weight: bold;">Name</label>
+          <input id="swal-name" class="swal2-input" value="${
+            user.displayName || "Anonymous"
+          }" readonly style="margin-top:0; background: #f3f4f6; cursor: not-allowed; width: 85%">
+          
+          <label style="display:block; margin-top: 15px; margin-bottom: 5px; font-weight: bold;">Email</label>
+          <input id="swal-email" class="swal2-input" value="${
+            user.email
+          }" readonly style="margin-top:0; background: #f3f4f6; cursor: not-allowed; width: 85%">
+          
+          <label style="display:block; margin-top: 15px; margin-bottom: 5px; font-weight: bold;">Phone Number *</label>
+          <input id="swal-phone" type="tel" class="swal2-input" placeholder="01XXX-XXXXXX" style="margin-top:0; width: 85%">
+          
+          <label style="display:block; margin-top: 15px; margin-bottom: 5px; font-weight: bold;">Shipping Address *</label>
+          <textarea id="swal-address" class="swal2-textarea" placeholder="Enter your full address" style="margin-top:0; width: 85%"></textarea>
+        </div>
+      `,
+      focusConfirm: false,
       showCancelButton: true,
-      confirmButtonColor: "#2563eb",
-      cancelButtonColor: "#6b7280",
       confirmButtonText: "Place Order",
+      confirmButtonColor: "#2563eb",
+      preConfirm: () => {
+        const phone = document.getElementById("swal-phone").value;
+        const address = document.getElementById("swal-address").value;
+
+        if (!phone || !address) {
+          Swal.showValidationMessage("Please fill in both Phone and Address");
+          return false;
+        }
+        return { phone, address };
+      },
     });
 
-    if (result.isConfirmed) {
+    if (formValues) {
       try {
         setIsOrdering(true);
 
@@ -73,6 +101,8 @@ const BookDetails = () => {
           uid: user.uid,
           email: user.email,
           name: user.displayName || "Anonymous",
+          phone: formValues.phone,
+          address: formValues.address,
           bookId: book._id,
           isbn: book.isbn,
           title: book.title,
@@ -161,7 +191,7 @@ const BookDetails = () => {
           className="lg:col-span-4 space-y-6"
         >
           <div className="relative group">
-            <div className="absolute -inset-1 bg-linear-to-r from-blue-600 to-indigo-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
             <img
               src={book.thumbnailUrl}
               alt={book.title}
