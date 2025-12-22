@@ -1,13 +1,6 @@
 import React from "react";
-import {
-  Facebook,
-  Twitter,
-  Youtube,
-  Instagram,
-  Mail,
-  MapPin,
-  Phone,
-} from "lucide-react";
+import { Facebook, Twitter, Youtube, Mail, MapPin, Phone } from "lucide-react";
+import { FaXTwitter } from "react-icons/fa6";
 
 const Footer = () => {
   return (
@@ -35,7 +28,7 @@ const Footer = () => {
                 <Twitter size={20} />
               </a>
               <a className="hover:text-primary transition-colors cursor-pointer">
-                <Instagram size={20} />
+                <FaXTwitter size={20} />
               </a>
               <a className="hover:text-primary transition-colors cursor-pointer">
                 <Youtube size={20} />
