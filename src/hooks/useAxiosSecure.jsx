@@ -4,7 +4,7 @@ import { useNavigate } from "react-router";
 import { AuthContext } from "../Context/AuthContext/AuthContext";
 
 const axiosSecure = axios.create({
-  baseURL: "http://localhost:3000",
+  baseURL: "https://book-blitz-server.vercel.app",
 });
 
 const useAxiosSecure = () => {
