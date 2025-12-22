@@ -7,9 +7,9 @@ const AllBooks = () => {
   const [price, setPrice] = useState(0);
   const [debouncedPrice, setDebouncedPrice] = useState(0);
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [sortOrder, setSortOrder] = useState("desc");
+  const [sortOrder, setSortOrder] = useState("newest");
 
-  // Debounce price to prevent excessive API calls while sliding
+  // Debounce price to prevent excessive API calls
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedPrice(price);
@@ -50,13 +50,20 @@ const AllBooks = () => {
     isLoading,
     isError,
   } = useInfiniteQuery({
-    // Use debouncedPrice here so the query only fires after the user stops sliding
     queryKey: ["books", debouncedPrice, selectedCategories, sortOrder],
     queryFn: async ({ pageParam = 0 }) => {
+      // Map the UI state to the backend sort strings
+      const sortMapping = {
+        newest: "publishedDate:desc",
+        oldest: "publishedDate:asc",
+        priceLow: "price:asc",
+        priceHigh: "price:desc",
+      };
+
       const params = {
         skip: pageParam,
         limit: 12,
-        sort: sortOrder === "asc" ? "publishedDate:asc" : "publishedDate:desc",
+        sort: sortMapping[sortOrder] || "publishedDate:desc",
       };
 
       if (debouncedPrice > 0) params.maxPrice = debouncedPrice;
@@ -68,8 +75,8 @@ const AllBooks = () => {
       return response.data;
     },
     getNextPageParam: (lastPage) => lastPage.nextSkip || undefined,
-    // Refetch when filters change
-    keepPreviousData: true,
+    // Prevents UI flicker while fetching filtered results
+    placeholderData: (previousData) => previousData,
   });
 
   const handleCategoryChange = (category) => {
@@ -171,8 +178,10 @@ const AllBooks = () => {
                 onChange={(e) => setSortOrder(e.target.value)}
                 className="border-none bg-transparent font-medium focus:ring-0 cursor-pointer text-gray-900"
               >
-                <option value="desc">Newest Arrivals</option>
-                <option value="asc">Oldest First</option>
+                <option value="newest">Newest Arrivals</option>
+                <option value="oldest">Oldest First</option>
+                <option value="priceLow">Price: Low to High</option>
+                <option value="priceHigh">Price: High to Low</option>
               </select>
             </div>
           </div>
@@ -234,7 +243,6 @@ const AllBooks = () => {
                   <span className="flex items-center">
                     <svg
                       className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
                     >

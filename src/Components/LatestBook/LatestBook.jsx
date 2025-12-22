@@ -12,17 +12,14 @@ import "swiper/css/pagination";
 import { Link } from "react-router";
 
 const fetchLatestBooks = async () => {
-  const res = await axiosInstance.get("/books?latest=true");
-  // Logic: return the data directly if it's an array,
-  // otherwise look for a property like 'books' or 'data' inside the response
-  return Array.isArray(res.data)
-    ? res.data
-    : res.data.books || res.data.data || [];
+  const res = await axiosInstance.get("/books/latest");
+  console.log(res.data);
+  return res.data;
 };
 
 const LatestBook = () => {
   const {
-    data: books = [], // Default to empty array
+    data: books = [],
     isLoading,
     isError,
   } = useQuery({

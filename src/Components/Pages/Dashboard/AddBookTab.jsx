@@ -1,14 +1,16 @@
 import axios from "axios";
 import axiosInstance from "../../../Context/Axios/Axios";
+import { use } from "react";
+import { AuthContext } from "../../../Context/AuthContext/AuthContext";
 
 const AddBookTab = () => {
+  const { user } = use(AuthContext);
   const handleSubmit = async (e) => {
     e.preventDefault();
     const form = e.target;
     const imageFile = form.image.files[0];
 
     try {
-      // ১. ইমেজ আপলোড (ImgBB)
       const formData = new FormData();
       formData.append("image", imageFile);
 
@@ -19,11 +21,13 @@ const AddBookTab = () => {
 
       const imageUrl = imgbbResponse.data.data.display_url;
 
+      const date = new Date(form.publishedDate.value);
+      const formattedDate = date.toISOString().replace("Z", "+00:00");
       const book = {
         title: form.title.value,
         isbn: form.isbn.value,
         pageCount: Number(form.pageCount.value),
-        publishedDate: new Date(form.publishedDate.value).toISOString(),
+        publishedDate: formattedDate,
         thumbnailUrl: imageUrl,
         shortDescription: form.shortDescription.value,
         longDescription: form.longDescription.value,
@@ -31,11 +35,14 @@ const AddBookTab = () => {
         authors: form.authors.value.split(",").map((a) => a.trim()),
         categories: form.categories.value.split(",").map((c) => c.trim()),
         price: parseFloat(form.price.value),
+        librarianEmail: user.email,
       };
+
+      console.log(book);
 
       await axiosInstance.post("/librarian/books", book);
 
-      form.reset();
+      //   form.reset();
       alert("Book added successfully!");
     } catch (error) {
       console.error("Error adding book:", error);
