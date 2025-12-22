@@ -12,13 +12,13 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { AuthContext } from "../../../Context/AuthContext/AuthContext";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
-import axiosInstance from "../../../Context/Axios/Axios";
 import { ProfileTab } from "./ProfileTab";
+import InvoicesTab from "./InvoicesTab";
 
 const UserDashboard = () => {
   const [activeTab, setActiveTab] = useState("orders");
   const [orders, setOrders] = useState([]);
-  const { user, updateUserProfile } = use(AuthContext);
+  const { user } = use(AuthContext);
   const email = user?.email;
   const axiosSecure = useAxiosSecure();
 
@@ -85,6 +85,14 @@ const UserDashboard = () => {
             }`}
           >
             <User size={16} /> Profile
+          </button>
+          <button
+            onClick={() => setActiveTab("Invoices")}
+            className={`tab gap-2 transition-all ${
+              activeTab === "Invoices" ? "tab-active" : ""
+            }`}
+          >
+            <FileText size={16} /> Invoices
           </button>
         </div>
 
@@ -179,6 +187,7 @@ const UserDashboard = () => {
 
             {/* PROFILE PAGE */}
             {activeTab === "profile" && <ProfileTab></ProfileTab>}
+            {activeTab === "Invoices" && <InvoicesTab></InvoicesTab>}
           </motion.div>
         </AnimatePresence>
       </div>

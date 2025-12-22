@@ -1,7 +1,6 @@
 import React, { useState, useEffect, use, useRef } from "react";
 import { Camera, Loader2 } from "lucide-react";
 import { AuthContext } from "../../../Context/AuthContext/AuthContext";
-import axiosInstance from "../../../Context/Axios/Axios";
 
 export const ProfileTab = () => {
   const { user, updateUserProfile } = use(AuthContext);
