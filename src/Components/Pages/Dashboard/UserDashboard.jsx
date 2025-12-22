@@ -118,7 +118,8 @@ const UserDashboard = () => {
                           <th>#</th>
                           <th>Book Title</th>
                           <th>Order Date</th>
-                          <th>Status</th>
+                          <th>Payment Status</th>
+                          <th>Shiped Status</th>
                           <th className="text-right">Actions</th>
                         </tr>
                       </thead>
@@ -154,6 +155,7 @@ const UserDashboard = () => {
                                 {order.status.toUpperCase()}
                               </div>
                             </td>
+                            <td>{order?.shipedStatus?.toUpperCase()}</td>
                             <td className="text-right">
                               {order.status === "pending" ? (
                                 <div className="flex justify-end gap-2">

@@ -79,7 +79,9 @@ const BookDetails = () => {
           price: book.price,
           quantity: 1,
           totalAmount: book.price,
+          librarianEmail: book.librarianEmail,
           status: "pending",
+          shipedStatus: "pending",
           orderDate: new Date().toISOString(),
         };
 
