@@ -1,34 +1,45 @@
 import { use, useEffect, useState } from "react";
 import axiosInstance from "../../../Context/Axios/Axios";
 import { AuthContext } from "../../../Context/AuthContext/AuthContext";
+import UpdateBookModal from "./UpdateBookModal"; // We will create this next
 
 const MyBooksTab = () => {
   const { user } = use(AuthContext);
   const [books, setBooks] = useState([]);
+  const [selectedBook, setSelectedBook] = useState(null);
 
   useEffect(() => {
-    axiosInstance
-      .get(`/librarian/books?email=${user.email}`)
-      .then((res) => setBooks(res.data));
-  }, [user.email]);
+    if (user?.email) {
+      axiosInstance
+        .get(`/librarian/books?email=${user.email}`)
+        .then((res) => setBooks(res.data));
+    }
+  }, [user?.email]);
 
   const handleUnpublish = async (id) => {
     await axiosInstance.patch(`/librarian/books/${id}`, {
       status: "UNPUBLISHED",
     });
-
     setBooks((prev) =>
       prev.map((b) => (b._id === id ? { ...b, status: "UNPUBLISHED" } : b))
     );
   };
+
   const handlePublish = async (id) => {
     await axiosInstance.patch(`/librarian/books/${id}`, {
       status: "PUBLISHED",
     });
-
     setBooks((prev) =>
       prev.map((b) => (b._id === id ? { ...b, status: "PUBLISHED" } : b))
     );
+  };
+
+  // Function to refresh the list after update
+  const onUpdateSuccess = (updatedBook) => {
+    setBooks((prev) =>
+      prev.map((b) => (b._id === updatedBook._id ? updatedBook : b))
+    );
+    setSelectedBook(null);
   };
 
   return (
@@ -64,7 +75,7 @@ const MyBooksTab = () => {
                   <td>
                     <span
                       className={`badge ${
-                        book.status === "published"
+                        book.status === "PUBLISHED"
                           ? "badge-success"
                           : "badge-warning"
                       }`}
@@ -73,39 +84,40 @@ const MyBooksTab = () => {
                     </span>
                   </td>
                   <td className="text-right">
-                    {book.status === "PUBLISHED" ? (
-                      <button
-                        onClick={() => {
-                          handleUnpublish(book._id);
-                        }}
-                        className="btn btn-outline"
-                      >
-                        Unpublish
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          handlePublish(book._id);
-                        }}
-                        className="btn btn-outline"
-                      >
-                        Publish
-                      </button>
-                    )}
+                    <button
+                      onClick={() =>
+                        book.status === "PUBLISHED"
+                          ? handleUnpublish(book._id)
+                          : handlePublish(book._id)
+                      }
+                      className="btn btn-sm btn-outline mr-2"
+                    >
+                      {book.status === "PUBLISHED" ? "Unpublish" : "Publish"}
+                    </button>
+
+                    {/* EDIT BUTTON */}
+                    <button
+                      onClick={() => setSelectedBook(book)}
+                      className="btn btn-sm btn-info"
+                    >
+                      Edit
+                    </button>
                   </td>
                 </tr>
               ))}
-              {books.length === 0 && (
-                <tr>
-                  <td colSpan="5" className="text-center py-8 opacity-50">
-                    No books added yet
-                  </td>
-                </tr>
-              )}
             </tbody>
           </table>
         </div>
       </div>
+
+      {/* Modal Render */}
+      {selectedBook && (
+        <UpdateBookModal
+          book={selectedBook}
+          onClose={() => setSelectedBook(null)}
+          onUpdateSuccess={onUpdateSuccess}
+        />
+      )}
     </div>
   );
 };

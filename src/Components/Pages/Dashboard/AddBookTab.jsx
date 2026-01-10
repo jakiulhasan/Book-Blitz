@@ -42,7 +42,7 @@ const AddBookTab = () => {
 
       await axiosInstance.post("/librarian/books", book);
 
-      //   form.reset();
+      form.reset();
       alert("Book added successfully!");
     } catch (error) {
       console.error("Error adding book:", error);
@@ -120,7 +120,7 @@ const AddBookTab = () => {
 
           {/* Status */}
           <select name="status" className="select select-bordered w-full">
-            <option value="PUBLISH">PUBLISH</option>
+            <option value="PUBLISHED">PUBLISHED</option>
             <option value="UNPUBLISH">UNPUBLISH</option>
           </select>
 
