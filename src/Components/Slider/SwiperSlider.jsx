@@ -9,6 +9,7 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/effect-fade";
 import axiosInstance from "../../Context/Axios/Axios";
+import { Link } from "react-router";
 
 const SwiperSlider = () => {
   const {
@@ -83,7 +84,7 @@ const SwiperSlider = () => {
                     variants={fadeDown}
                     className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 border border-primary/30 text-primary-content text-xs font-bold uppercase tracking-widest"
                   >
-                    <BookOpen size={14} /> New Arrival 2025
+                    <BookOpen size={14} /> New Arrival 202
                   </motion.div>
 
                   <motion.h1
@@ -108,12 +109,18 @@ const SwiperSlider = () => {
                     transition={{ delay: 0.4 }}
                     className="flex flex-wrap gap-3 md:gap-4 pt-2"
                   >
-                    <button className="btn btn-primary btn-sm md:btn-md rounded-lg px-6">
+                    <Link
+                      to="/books"
+                      className="btn btn-primary btn-sm md:btn-md rounded-lg px-6"
+                    >
                       Enroll Now <ArrowRight size={18} />
-                    </button>
-                    <button className="btn btn-outline btn-sm md:btn-md rounded-lg text-white border-white hover:bg-white hover:text-black px-6">
+                    </Link>
+                    <Link
+                      to="/books"
+                      className="btn btn-outline btn-sm md:btn-md rounded-lg text-white border-white hover:bg-white hover:text-black px-6"
+                    >
                       View Details
-                    </button>
+                    </Link>
                   </motion.div>
                 </motion.div>
               </div>
