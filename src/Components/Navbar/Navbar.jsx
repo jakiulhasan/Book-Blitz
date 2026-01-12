@@ -1,6 +1,6 @@
-import React, { use } from "react";
+import React, { use, useState, useEffect, useRef } from "react";
 import { Link, NavLink } from "react-router";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
   User,
@@ -13,16 +13,72 @@ import {
   Library,
   Heart,
   Layers,
+  Loader2,
+  X,
 } from "lucide-react";
 import ThemeToggle from "../Theme/ThemeToggle";
 import { AuthContext } from "../../Context/AuthContext/AuthContext";
 import useRole from "../../hooks/useRole";
+import axiosInstance from "../../Context/Axios/Axios";
 
 const Navbar = () => {
   const { role } = useRole();
   const { signOutUser, user } = use(AuthContext);
 
-  // Animation Variants for Links
+  // Search States
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]); // Initialized as empty array
+  const [isLoading, setIsLoading] = useState(false);
+  const [showResults, setShowResults] = useState(false);
+  const searchContainerRef = useRef(null);
+
+  // Close search results when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(event.target)
+      ) {
+        setShowResults(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Debounced Search Logic
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (searchQuery.trim().length > 1) {
+        setIsLoading(true);
+        setShowResults(true);
+        try {
+          // Adjust the URL to your specific backend port/address
+          const response = await axiosInstance.get(
+            `books/search?query=${searchQuery}`
+          );
+
+          // CRITICAL FIX: Ensure we always set an array
+          if (Array.isArray(response.data)) {
+            setSearchResults(response.data);
+          } else {
+            setSearchResults([]);
+          }
+        } catch (error) {
+          console.error("Search failed", error);
+          setSearchResults([]); // Set empty array on error to prevent .map crash
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        setSearchResults([]);
+        setShowResults(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery]);
+
   const navLinkVariants = {
     initial: { opacity: 0, y: -10 },
     animate: (i) => ({
@@ -35,15 +91,15 @@ const Navbar = () => {
   const navLinksData = [
     { to: "/", icon: <Home size={18} />, label: "Home" },
     { to: "/books", icon: <Book size={18} />, label: "All Books" },
-    { to: "/categories", icon: <Layers size={18} />, label: "Request a Book" },
+    { to: "/categories", icon: <Layers size={18} />, label: "Request" },
     {
       to: "/trending",
       icon: <Heart size={18} className="text-red-500" />,
-      label: "Whishlist",
+      label: "Wishlist",
     },
   ];
 
-  const renderNavLinks = (isMobile = false) => (
+  const renderNavLinks = () => (
     <>
       {navLinksData.map((link, i) => (
         <motion.li
@@ -57,7 +113,7 @@ const Navbar = () => {
             to={link.to}
             className={({ isActive }) =>
               `flex items-center gap-2 ${
-                isActive ? "text-primary font-bold" : ""
+                isActive ? "text-primary font-bold bg-primary/10" : ""
               }`
             }
           >
@@ -90,7 +146,6 @@ const Navbar = () => {
     <motion.div
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      transition={{ type: "spring", stiffness: 100, damping: 20 }}
       className="sticky top-0 z-[100] bg-base-100/80 backdrop-blur-md border-b border-base-200"
     >
       <div className="drawer">
@@ -111,37 +166,119 @@ const Navbar = () => {
               <Link to="/" className="flex items-center gap-2 group">
                 <motion.div
                   whileHover={{ rotate: 360, scale: 1.1 }}
-                  transition={{ type: "spring", stiffness: 260, damping: 20 }}
                   className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-primary-content font-black text-xl shadow-lg shadow-primary/20"
                 >
                   B
                 </motion.div>
-                <motion.span
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="text-xl font-bold tracking-tighter hidden sm:block"
-                >
+                <span className="text-xl font-bold tracking-tighter hidden sm:block">
                   Book<span className="text-primary">Blitz</span>
-                </motion.span>
+                </span>
               </Link>
             </div>
 
             {/* Navbar Center: Search Bar (Desktop) */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="navbar-center hidden md:flex grow justify-center max-w-md mx-8"
+            <div
+              className="navbar-center hidden md:flex grow justify-center max-w-md mx-8 relative"
+              ref={searchContainerRef}
             >
               <div className="join w-full shadow-sm border border-base-300 rounded-lg overflow-hidden group focus-within:border-primary transition-colors">
                 <input
                   className="input join-item w-full focus:outline-none bg-base-100"
                   placeholder="Search titles, authors..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => searchQuery.length > 1 && setShowResults(true)}
                 />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="btn btn-ghost btn-sm join-item px-2 text-base-content/30 hover:text-error"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
                 <button className="btn btn-primary join-item px-6 border-none">
-                  <Search size={20} />
+                  {isLoading ? (
+                    <Loader2 size={20} className="animate-spin" />
+                  ) : (
+                    <Search size={20} />
+                  )}
                 </button>
               </div>
-            </motion.div>
+
+              {/* Real-time Search Results Dropdown */}
+              <AnimatePresence>
+                {showResults && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="absolute top-full left-0 w-full bg-base-100 mt-2 rounded-xl border border-base-200 shadow-2xl overflow-hidden z-[110] max-h-[450px] overflow-y-auto"
+                  >
+                    {isLoading ? (
+                      <div className="p-10 flex flex-col items-center justify-center gap-3">
+                        <span className="loading loading-spinner loading-lg text-primary"></span>
+                        <p className="text-sm font-medium animate-pulse">
+                          Searching the archives...
+                        </p>
+                      </div>
+                    ) : Array.isArray(searchResults) &&
+                      searchResults.length > 0 ? (
+                      <ul className="menu p-2">
+                        <li className="menu-title text-xs uppercase opacity-50 px-4 py-2">
+                          Books Found
+                        </li>
+                        {searchResults.map((book) => (
+                          <li key={book._id}>
+                            <Link
+                              to={`/books/${book.isbn}`}
+                              className="flex w-full items-center gap-4 py-3 active:bg-primary/10"
+                              onClick={() => {
+                                setShowResults(false);
+                                setSearchQuery("");
+                              }}
+                            >
+                              <div className="w-12 h-16 flex-shrink-0">
+                                <img
+                                  src={
+                                    book.thumbnailUrl ||
+                                    "https://via.placeholder.com/150"
+                                  }
+                                  alt={book.title}
+                                  className="w-full h-full object-cover rounded shadow-sm border border-base-200"
+                                />
+                              </div>
+                              <div className="flex flex-col gap-1 overflow-hidden">
+                                <span className="font-bold text-sm truncate">
+                                  {book.title}
+                                </span>
+                                <span className="text-xs opacity-60 truncate">
+                                  {Array.isArray(book.authors)
+                                    ? book.authors.join(", ")
+                                    : "Unknown Author"}
+                                </span>
+                                {book.price && (
+                                  <span className="text-xs text-primary font-semibold">
+                                    ${book.price}
+                                  </span>
+                                )}
+                              </div>
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div className="p-10 text-center">
+                        <Book size={40} className="mx-auto mb-2 opacity-10" />
+                        <p className="text-sm text-base-content/60">
+                          No matches found for "{searchQuery}"
+                        </p>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
             {/* Navbar End */}
             <div className="navbar-end w-auto flex-none gap-2">
@@ -167,8 +304,7 @@ const Navbar = () => {
                       <img
                         src={
                           user?.photoURL ||
-                          "https://ui-avatars.com/api/?name=" +
-                            user?.displayName
+                          `https://ui-avatars.com/api/?name=${user?.displayName}`
                         }
                         alt="profile"
                       />
@@ -179,29 +315,8 @@ const Navbar = () => {
                     tabIndex={0}
                     className="dropdown-content menu bg-base-100 rounded-box z-[101] w-56 p-2 shadow-2xl border border-base-200 mt-4"
                   >
-                    <li className="menu-title text-xs uppercase tracking-widest opacity-50">
-                      Personal Shelf
-                    </li>
-                    <li>
-                      <Link
-                        to={`/${role}/my-library`}
-                        className="flex justify-between"
-                      >
-                        <span className="flex items-center gap-2">
-                          <Library size={16} /> My Library
-                        </span>
-                        <span className="badge badge-sm badge-ghost">4</span>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to={`/${role}/wishlist`}>
-                        <Heart size={16} className="text-secondary" /> Wishlist
-                      </Link>
-                    </li>
-
-                    <div className="divider my-1"></div>
-                    <li className="menu-title text-xs uppercase tracking-widest opacity-50">
-                      Settings
+                    <li className="menu-title text-xs uppercase opacity-50">
+                      Account
                     </li>
                     <li>
                       <Link to={`/${role}/dashboard`}>
@@ -209,8 +324,8 @@ const Navbar = () => {
                       </Link>
                     </li>
                     <li>
-                      <Link to={`/${role}/settings`}>
-                        <Settings size={16} /> Preferences
+                      <Link to={`/${role}/my-library`}>
+                        <Library size={16} /> My Library
                       </Link>
                     </li>
                     <div className="divider my-1"></div>
@@ -246,13 +361,8 @@ const Navbar = () => {
 
         {/* Mobile Drawer Sidebar */}
         <div className="drawer-side z-[200]">
-          <label
-            htmlFor="main-drawer"
-            aria-label="close sidebar"
-            className="drawer-overlay"
-          ></label>
+          <label htmlFor="main-drawer" className="drawer-overlay"></label>
           <ul className="menu p-4 w-80 min-h-full bg-base-100 text-base-content flex flex-col gap-2">
-            {/* Sidebar Logo */}
             <div className="flex items-center gap-3 mb-6 px-4 py-4 border-b border-base-200">
               <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-primary-content font-bold shadow-lg">
                 B
@@ -262,26 +372,10 @@ const Navbar = () => {
               </span>
             </div>
 
-            {/* Mobile Search */}
-            <div className="px-2 mb-4">
-              <div className="join w-full">
-                <input
-                  className="input input-bordered join-item w-full focus:outline-none"
-                  placeholder="Search books..."
-                />
-                <button className="btn btn-primary join-item">
-                  <Search size={18} />
-                </button>
-              </div>
-            </div>
-
-            {/* Mobile Links */}
-            <div className="flex flex-col">
-              <li className="menu-title text-xs uppercase opacity-50 px-4 mb-2">
-                Navigation
-              </li>
-              {renderNavLinks(true)}
-            </div>
+            <li className="menu-title text-xs uppercase opacity-50 px-4 mb-2">
+              Navigation
+            </li>
+            {renderNavLinks()}
 
             {user && (
               <div className="mt-auto border-t border-base-200 pt-4">
