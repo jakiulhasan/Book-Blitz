@@ -21,16 +21,37 @@ const Footer = () => {
               and a vast collection.
             </p>
             <div className="flex gap-4">
-              <a className="hover:text-primary transition-colors cursor-pointer">
+              {/* Added href and target for social links */}
+              <a
+                href="https://facebook.com"
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-primary transition-colors cursor-pointer"
+              >
                 <Facebook size={20} />
               </a>
-              <a className="hover:text-primary transition-colors cursor-pointer">
+              <a
+                href="https://twitter.com"
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-primary transition-colors cursor-pointer"
+              >
                 <Twitter size={20} />
               </a>
-              <a className="hover:text-primary transition-colors cursor-pointer">
+              <a
+                href="https://x.com"
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-primary transition-colors cursor-pointer"
+              >
                 <FaXTwitter size={20} />
               </a>
-              <a className="hover:text-primary transition-colors cursor-pointer">
+              <a
+                href="https://youtube.com"
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-primary transition-colors cursor-pointer"
+              >
                 <Youtube size={20} />
               </a>
             </div>
@@ -42,16 +63,28 @@ const Footer = () => {
               Company
             </h3>
             <div className="flex flex-col gap-2">
-              <a className="link link-hover text-base-content/70 hover:text-primary">
+              <a
+                href="/about"
+                className="link link-hover text-base-content/70 hover:text-primary"
+              >
                 About us
               </a>
-              <a className="link link-hover text-base-content/70 hover:text-primary">
+              <a
+                href="/services"
+                className="link link-hover text-base-content/70 hover:text-primary"
+              >
                 Our Services
               </a>
-              <a className="link link-hover text-base-content/70 hover:text-primary">
+              <a
+                href="/jobs"
+                className="link link-hover text-base-content/70 hover:text-primary"
+              >
                 Jobs
               </a>
-              <a className="link link-hover text-base-content/70 hover:text-primary">
+              <a
+                href="/press"
+                className="link link-hover text-base-content/70 hover:text-primary"
+              >
                 Press kit
               </a>
             </div>
@@ -69,11 +102,18 @@ const Footer = () => {
               </div>
               <div className="flex items-center gap-3">
                 <Phone size={18} className="text-primary" />
-                <span>+880 123 456 789</span>
+                <a href="tel:+880123456789" className="hover:underline">
+                  +880 123 456 789
+                </a>
               </div>
               <div className="flex items-center gap-3">
                 <Mail size={18} className="text-primary" />
-                <span>support@bookblitz.com</span>
+                <a
+                  href="mailto:support@bookblitz.com"
+                  className="hover:underline"
+                >
+                  support@bookblitz.com
+                </a>
               </div>
             </div>
           </div>
@@ -86,16 +126,19 @@ const Footer = () => {
             <p className="text-sm text-base-content/70 mb-4">
               Subscribe to get updates on new arrivals and offers.
             </p>
-            <div className="form-control">
+            <form onSubmit={(e) => e.preventDefault()} className="form-control">
               <div className="join w-full">
                 <input
-                  type="text"
+                  type="email"
+                  required
                   placeholder="email@example.com"
                   className="input input-bordered join-item w-full focus:outline-none"
                 />
-                <button className="btn btn-primary join-item">Join</button>
+                <button type="submit" className="btn btn-primary join-item">
+                  Join
+                </button>
               </div>
-            </div>
+            </form>
           </div>
         </div>
 
@@ -106,9 +149,15 @@ const Footer = () => {
             reserved.
           </p>
           <div className="flex gap-6">
-            <a className="link link-hover">Privacy Policy</a>
-            <a className="link link-hover">Terms of Service</a>
-            <a className="link link-hover">Cookie Policy</a>
+            <a href="/privacy" className="link link-hover">
+              Privacy Policy
+            </a>
+            <a href="/terms" className="link link-hover">
+              Terms of Service
+            </a>
+            <a href="/cookies" className="link link-hover">
+              Cookie Policy
+            </a>
           </div>
         </div>
       </div>

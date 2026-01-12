@@ -1,6 +1,12 @@
 import { useForm } from "react-hook-form";
 import { use, useState } from "react";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import {
+  FaEye,
+  FaEyeSlash,
+  FaUserShield,
+  FaUser,
+  FaBookReader,
+} from "react-icons/fa";
 import { Link, Navigate } from "react-router";
 import { AuthContext } from "../../Context/AuthContext/AuthContext";
 import axiosInstance from "../../Context/Axios/Axios";
@@ -10,12 +16,18 @@ export default function Login() {
   const {
     register,
     handleSubmit,
+    setValue, // Added to allow auto-filling
     formState: { errors },
   } = useForm();
 
   const [showPassword, setShowPassword] = useState(false);
-
   const { userSignIn, googleSignIn, user } = use(AuthContext);
+
+  // Function to auto-fill the form
+  const handleDemoLogin = (email, password) => {
+    setValue("email", email, { shouldValidate: true });
+    setValue("password", password, { shouldValidate: true });
+  };
 
   const onSubmit = (data) => {
     console.log("Login Data:", data);
@@ -64,6 +76,7 @@ export default function Login() {
         alert(error.message);
       });
   };
+
   if (user) {
     return <Navigate to="/" />;
   }
@@ -74,13 +87,46 @@ export default function Login() {
         <div className="card-body">
           <h2 className="text-2xl font-bold text-center">Login</h2>
 
+          {/* Demo Login Buttons Section */}
+          <div className="mt-4">
+            <p className="text-xs font-semibold text-center mb-2 opacity-70">
+              QUICK DEMO LOGIN
+            </p>
+            <div className="flex flex-wrap gap-2 justify-center">
+              <button
+                type="button"
+                onClick={() => handleDemoLogin("admin@admin.com", "Admin123@g")}
+                className="btn btn-xs btn-outline btn-info flex items-center gap-1"
+              >
+                <FaUserShield /> Admin
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  handleDemoLogin("librarian@bb.com", "Librarian123@g")
+                }
+                className="btn btn-xs btn-outline btn-success flex items-center gap-1"
+              >
+                <FaBookReader /> Librarian
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDemoLogin("user@user.com", "User123@g")}
+                className="btn btn-xs btn-outline btn-warning flex items-center gap-1"
+              >
+                <FaUser /> User
+              </button>
+            </div>
+          </div>
+
+          <div className="divider text-xs">OR ENTER MANUALLY</div>
+
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Email */}
             <div className="form-control">
               <label className="label">
                 <span className="label-text">Email</span>
               </label>
-              <br></br>
               <input
                 type="email"
                 placeholder="email@example.com"
