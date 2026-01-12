@@ -16,6 +16,8 @@ import { Book } from "lucide-react";
 import BookDetails from "../Components/BookDetails/BookDetails";
 import PaymentCancelled from "../Components/Pages/Dashboard/PaymentCancelled";
 import PaymentSuccess from "../Components/Pages/Dashboard/PaymentSuccess";
+import RequestBook from "../Components/RequestBook/RequestBook";
+import { Wishlist } from "../Components/wishlist/Wishlist";
 
 const router = createBrowserRouter([
   {
@@ -37,6 +39,14 @@ const router = createBrowserRouter([
       {
         path: "/books",
         Component: AllBooks,
+      },
+      {
+        path: "/request-book",
+        Component: RequestBook,
+      },
+      {
+        path: "/wishlist",
+        Component: Wishlist,
       },
       {
         path: "/books/:isbn",

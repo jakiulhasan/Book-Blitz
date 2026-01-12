@@ -27,7 +27,7 @@ const Navbar = () => {
 
   // Search States
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState([]); // Initialized as empty array
+  const [searchResults, setSearchResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const searchContainerRef = useRef(null);
@@ -53,12 +53,9 @@ const Navbar = () => {
         setIsLoading(true);
         setShowResults(true);
         try {
-          // Adjust the URL to your specific backend port/address
           const response = await axiosInstance.get(
             `books/search?query=${searchQuery}`
           );
-
-          // CRITICAL FIX: Ensure we always set an array
           if (Array.isArray(response.data)) {
             setSearchResults(response.data);
           } else {
@@ -66,7 +63,7 @@ const Navbar = () => {
           }
         } catch (error) {
           console.error("Search failed", error);
-          setSearchResults([]); // Set empty array on error to prevent .map crash
+          setSearchResults([]);
         } finally {
           setIsLoading(false);
         }
@@ -88,15 +85,21 @@ const Navbar = () => {
     }),
   };
 
+  // Dynamically generate links based on user status
   const navLinksData = [
     { to: "/", icon: <Home size={18} />, label: "Home" },
     { to: "/books", icon: <Book size={18} />, label: "All Books" },
-    { to: "/categories", icon: <Layers size={18} />, label: "Request" },
-    {
-      to: "/trending",
-      icon: <Heart size={18} className="text-red-500" />,
-      label: "Wishlist",
-    },
+    { to: "/request-book", icon: <Layers size={18} />, label: "Request" },
+    // Wishlist added conditionally
+    ...(user
+      ? [
+          {
+            to: "/wishlist",
+            icon: <Heart size={18} className="text-red-500" />,
+            label: "Wishlist",
+          },
+        ]
+      : []),
   ];
 
   const renderNavLinks = () => (
@@ -125,13 +128,13 @@ const Navbar = () => {
         <motion.li
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: navLinksData.length * 0.1 }}
         >
           <NavLink
             to={`/${role}/dashboard`}
             className={({ isActive }) =>
               `flex items-center gap-2 ${
-                isActive ? "text-primary font-bold" : ""
+                isActive ? "text-primary font-bold bg-primary/10" : ""
               }`
             }
           >
@@ -206,7 +209,7 @@ const Navbar = () => {
                 </button>
               </div>
 
-              {/* Real-time Search Results Dropdown */}
+              {/* Search Results Dropdown */}
               <AnimatePresence>
                 {showResults && (
                   <motion.div
@@ -257,11 +260,6 @@ const Navbar = () => {
                                     ? book.authors.join(", ")
                                     : "Unknown Author"}
                                 </span>
-                                {book.price && (
-                                  <span className="text-xs text-primary font-semibold">
-                                    ${book.price}
-                                  </span>
-                                )}
                               </div>
                             </Link>
                           </li>
@@ -324,10 +322,11 @@ const Navbar = () => {
                       </Link>
                     </li>
                     <li>
-                      <Link to={`/${role}/my-library`}>
-                        <Library size={16} /> My Library
+                      <Link to={`/wishlist`}>
+                        <Heart size={16} className="text-red-500" /> My Wishlist
                       </Link>
                     </li>
+
                     <div className="divider my-1"></div>
                     <li>
                       <button
